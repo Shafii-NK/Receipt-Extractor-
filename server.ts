@@ -120,7 +120,7 @@ Perform a high-accuracy OCR parsing to extract:
         model: "gemini-3.5-flash",
         contents: { parts: [imagePart, textPart] },
         config: {
-          systemInstruction: "You are an expert OCR receipt parsing intelligence. Your goal is to parse receipts with absolute physical and mathematical accuracy, outputting structured JSON according to the requested schema. Extrapolate reasonable regions (x, y, w, h in 0-100% space) for the digitalTwinRegions coordinate array.",
+          systemInstruction: "You are an expert OCR receipt parsing intelligence. Your goal is to parse receipts with absolute physical and mathematical accuracy, outputting structured JSON according to the required schema.",
           responseMimeType: "application/json",
           responseSchema: receiptSchema,
           temperature: 0.1,
@@ -143,8 +143,13 @@ Perform a high-accuracy OCR parsing to extract:
   });
 
   // Handle health check
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", time: new Date().toISOString() });
+  app.get("/api/health", (_req, res) => {
+    const geminiConfigured = !!process.env.GEMINI_API_KEY;
+    res.json({
+      status: "ok",
+      time: new Date().toISOString(),
+      geminiConfigured,
+    });
   });
 
   // Vite development middleware vs Static Production files

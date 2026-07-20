@@ -45,10 +45,19 @@ export default function App() {
   useEffect(() => {
     // Check if API key is active on server
     fetch("/api/health")
-      .then((res) => res.json())
+      .then(async (res) => {
+        const contentType = res.headers.get("content-type") || "";
+
+        if (!res.ok || !contentType.includes("application/json")) {
+          const text = await res.text();
+          throw new Error(`Health check returned non-JSON response: ${text.slice(0, 120)}`);
+        }
+
+        return res.json();
+      })
       .then((data) => {
         // Set if server reports configured state
-        setIsApiKeySet(true); 
+        setIsApiKeySet(!!data?.geminiConfigured);
       })
       .catch(() => {
         setIsApiKeySet(false);
@@ -388,7 +397,7 @@ export default function App() {
                 ) : null}
 
                 {/* Draw the visual elements */}
-                <div className="relative w-full h-full bg-[#fdfdfb] border border-[#ecece8] shadow-[4px_4px_12px_rgba(0,0,0,0.04)] flex flex-col p-4 font-mono text-[10px] leading-tight text-stone-800">
+                <div className="relative w-full h-full bg-[#fdfdfb] border border-[#ecece8] shadow-[4px_4px_12px_rgba(0,0,0,0.04)] flex flex-col p-4 font-mono text-[10px] leading-tight text-stone-700 overflow-hidden">
                   
                   {/* Decorative receipt cuts */}
                   <div className="absolute -top-1 left-0 right-0 h-1 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-stone-400 via-stone-300 to-transparent opacity-20"></div>
@@ -759,7 +768,7 @@ export default function App() {
                   1. PROJECT OVERVIEW
                 </h4>
                 <p className="text-xs text-neutral-600">
-                  RECEPTA is a full-stack automated receipt digitizer providing zero-configuration structured database JSON payloads from thermal paper receipts. It incorporates computer vision technology to align scanned nodes with high-certainty JSON values.
+                  RECEPTA is a full-stack automated receipt digitizer providing zero-configuration structured database JSON payloads from thermal paper receipts. It incorporates computer vision tooling, geometry mapping, and AI-generated structured extraction overlays.
                 </p>
               </div>
 
@@ -779,7 +788,7 @@ export default function App() {
                   3. DATA EXTRACTION LOGIC
                 </h4>
                 <p className="text-xs text-neutral-600">
-                  The parser inspects bounding box anchors using normalized visual dimensions (0-100%). It validates product lines by corroborating quantity multipliers, subtotals, and currency identifiers before sealing the token payload.
+                  The parser inspects bounding box anchors using normalized visual dimensions (0-100%). It validates product lines by corroborating quantity multipliers, subtotals, and currency inference from typographical markers.
                 </p>
               </div>
             </div>
@@ -790,7 +799,7 @@ export default function App() {
                   4. FAULT INTRUSION & ERROR TOLERANCE
                 </h4>
                 <p className="text-xs text-neutral-600">
-                  Low-resolution scans provoke structural fallbacks. Missing line totals are re-calculated programmatically relative to line units. Low alignment confidence returns structural logs instead of silent failures, flagging regions for human confirmation.
+                  Low-resolution scans provoke structural fallbacks. Missing line totals are re-calculated programmatically relative to line units. Low alignment confidence returns structural logical defaults.
                 </p>
               </div>
 
